@@ -127,4 +127,21 @@ whose output is
 ```
 
 
+Posting of the data that mean a document into the field mapping for the movies would be  something of this sort .
+
+```
+  curl -XPOST http://localhost:5200/movies/_doc/10324 -d '
+  {
+     "genre": ["IMAX", "SCI-FI"],
+     "title": "Interstellar",
+     "date": 2020 
+  }
+  '
+```
+
+GEtting of the Movie document from the index 
+```
+  curl -XGET 'http://localhost:9200/movies/10324' 
+  
+```
 
