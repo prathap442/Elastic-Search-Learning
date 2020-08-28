@@ -186,11 +186,131 @@ The output response for the above insertion is
 
 Deleting of the Record in the Elastic SEarch
 ```
-  $ curl -XDELTE 'http://localhost:9202/movies/'
+  $ curl -XDELETE 'http://localhost:9202/movies/'
 ```
 
 
 
 
 When record is being Deleted then we use 
+
+
+
+
+What is the Concurrency problem ?
+
+   When the request  comes from two serves in getting the info about a document then elasticsearch sends back the info of the document being unchanged as in  `concurrency-view1.png` but when the document being changed like when the write operations are needed to be performed then 
+   
+   ```
+     solution to solve concurrency.png
+   ```
+
+   will be used .
+
+   Here the case is if the doucment has a filed by name articles_count whose value is 10 then in order to update 2 requests from  2 servers at a same time so the update shoule be from 
+
+   10 -------> 11 ------> 12
+
+   instead of this the error would occur saying 
+
+   Couldnot find the record with the sequence please retry 
+
+
+   then we have two important parameters that elastic search uses to solve the issue which is 
+
+   ```
+     _sequence_no: 1,
+     _primary_term: 21
+   ```
+ 
+
+   these are the two parameters with which the concurrency can be avoided and then what happens over here is that when a document is updated by one of the servers then the previous sequence number would be overwritten
+
+   ```
+     
+     curl -XPUT http://localhost:9200/movies/_doc/104987?if_seq_no=7&if_primary_term=32 -d '
+      {
+        "title": "Interstellar Foo 1",  
+      }
+     '
+
+    the output of the above request would be 
+    {
+       "title": "Interstellar Foo 1",
+       "version": ****changed****,
+       "seq_no": ****,
+       "primary_key": *****changed*** 
+    }
+
+
+
+    now if we try to hit back the uri with the same sequence number of 7 it throws back error that the record doesnot exist and is being updted with the sequence no .
+
+
+    To avoid this kind of issues the elastic search provides with an alternate of the retry_logs=12
+    so auto retries would happen at the time o the concurrency and the hit would succeed to increament count to the 12  which is expected .
+
+   ```
+
+
+
+Using Analyzers:
+   For the Exact text Match
+   if there should be an exact match on the fields of the document without partial matches then when creating the schema for indice needed to be taken so since we didnot do that we do that now by 
+   ```
+     $  curl -XDELETE http://localhost:9200/movies
+
+
+     {"acknowledged": true}
+     the above thing does the deletion of the movies schema
+   ```
+   and then we will recreate the schema by
+
+   ```
+     curl -XPUT http://localhost:9200/movies -d '
+      {
+         "mappings": 
+           {
+              "properties": 
+                  {
+                     "title": {
+                        "type": "text",
+                        "anlyzer": "english", # so that english analyzer would be used when searching for the data
+                     },
+                     "genre": {
+                         "type": "keyword" #so that the search would be for the exact keyword matching
+                     }        
+                  } 
+           } 
+      } 
+
+     '
+
+   ```
+
+
+   Then we will load some data with the help of the bulk_import.json which we havein the project by using 
+
+   ```
+     $ curl -XPUT http://localhost:3000/_bulk?pretty --data-binary @bulk_import.json
+   ```
+
+   Now that we have loaded the documents in th json we will now try to 
+   ```
+     curl -XGET http://localhost:9200/movies/_search?pretty -d {
+         "query": {
+           "match": {
+               "genre": "sci"
+           }
+         }
+     }
+
+     so since there is genre field but of the type keyword then the strict matching needs to happen and since it has not happened
+
+     0 results would be obtained here now .
+   ```
+   
+   but for the title some results which partially match with that keyword would also be released because the title is of the type text .
+
+
 
