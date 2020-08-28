@@ -1,0 +1,6 @@
+{"create": {"_index": "movies","_id": 12345 } }
+{"id": 12345, "title": "Race Gurram", "genre": ["Ginga", "Zigby"], "date": 2020 }
+{"create": {"_index": "movies", "_id": 12346} }
+{"id": 12346, "title": "Panja", "genre": ["Fight"]}
+{"create": {"_index": "movies", "_id": 12347} }
+{"id": 12347, "title": "Vrishni", "genre": ["Fiction"]}

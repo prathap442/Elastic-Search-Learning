@@ -142,6 +142,55 @@ Posting of the data that mean a document into the field mapping for the movies w
 GEtting of the Movie document from the index 
 ```
   curl -XGET 'http://localhost:9200/movies/10324' 
-  
+
 ```
+
+----------------------------------------------------
+CREaTING ONE doc OF MOVIE
+```
+curl -XPOST http://localhost:9200/movies/_doc/1025 -H 'Content-Type: application/json' -d '
+{
+  "genre": ["IMAX", "Fiction"],
+  "date": 2020,
+  "title": "Sherlock"
+}
+'
+
+```
+The output response for the above insertion is 
+```
+ {"_index":"movies","_type":"_doc","_id":"10245","_version":1,"result":"created","_shards":{"total":2,"successful":2,"failed":0},"_seq_no":3,"_primary_term":2}
+```
+
+
+
+# Update Operation in the Movies In Elastic Search:
+   In elastic search we cannot update an already existing records instead the updating here would be done by updating the version which means that the entire document would get created but with the different version and the old document is marked for the sake of the deletion.
+```
+  # it should XPOST when doing the partial update
+  curl -XPOST 'http://localhost:9202/movies/_doc/10497/_update' -d '
+  {
+    "title" : "Interstellar FFFFFFFF"
+  }
+  '
+
+  # when the record is fully updated then we use 
+  curl -XPUT 'http://localhost:9202/movies/_doc/10497?pretty' -d '{
+    "title": "Interstellar Fully Update"
+    "genre": ["Sci-Fi", "Fiction"]
+    "year": 2014
+  }
+  '
+```
+
+
+Deleting of the Record in the Elastic SEarch
+```
+  $ curl -XDELTE 'http://localhost:9202/movies/'
+```
+
+
+
+
+When record is being Deleted then we use 
 
