@@ -314,3 +314,71 @@ Using Analyzers:
 
 
 
+
+
+
+Relationships in the Data Schema .
+
+curl -XPUT http://localhost:9200/series -d 
+'
+    {
+       "properties": {
+           "mappings": {
+               "film_to_franchise": {
+                   "type": "join",
+                   "relations": {
+                      "franchise": "film"
+                      # franchise would be parent and the film would be child
+                   }
+               },
+           }
+       } 
+    }
+'
+
+
+
+Now Let us take this set of the data of the films.json
+```
+
+{ "create" : { "_index" : "series", "_id" : "1", "routing" : 1} }
+The above line indicates that we are creating an index by the name series and the id of the record is being 1
+
+
+{ "id": "1", "film_to_franchise": {"name": "franchise"}, "title" : "Star Wars" }
+
+
+
+{ "create" : { "_index" : "series", "_id" : "260", "routing" : 1} }
+{ "id": "260", "film_to_franchise": {"name": "film", "parent": "1"}, "title" : "Star Wars: Episode IV - A New Hope", "year":"1977" , "genre":["Action", "Adventure", "Sci-Fi"] }
+{ "create" : { "_index" : "series", "_id" : "1196", "routing" : 1} }
+{ "id": "1196", "film_to_franchise": {"name": "film", "parent": "1"}, "title" : "Star Wars: Episode V - The Empire Strikes Back", "year":"1980" , "genre":["Action", "Adventure", "Sci-Fi"] }
+```
+
+
+
+if we are searching for the parent in the series then we can do something of this sort 
+
+```
+    "has_parent": {
+      "parent_type": "TYPE",
+      "query": {}
+    }
+```
+
+
+GET /series/_search?pretty 
+{
+  "query": {
+    "has_parent": 
+      {
+        "parent_type": "franchise",
+        "query": 
+        {
+          "match": {
+            "title": "Parent1 film"  
+          }
+        }
+      }
+  }  
+}
