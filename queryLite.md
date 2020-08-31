@@ -954,3 +954,23 @@ What is a reqexp query?
 }
 
 ```
+
+
+
+For using Should bool type
+```
+  curl -XGET /movies/_search?pretty -d '
+  {
+      "query": {
+          "bool": {
+              "should": {
+                  "term": {
+                      # because for using should we need the datatype of the keyword
+                      "title.raw": "star-1"
+                  }
+              }
+          }
+      }
+  }
+  '
+```
